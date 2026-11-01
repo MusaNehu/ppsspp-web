@@ -458,7 +458,12 @@ setInterval(checkNetworkWhenVisible, 30000);
 /* ── State ──────────────────────────────────────────────────────── */
 let selectedGame = null;
 let selectedStoredGame = null;
-let started      = false;
+let personaDownloadPromise = null;
+
+const PERSONA_GAME_NAME = "persona.iso.iso";
+const PERSONA_R2_GAME_URL = "https://pub-cf9ef21a9b9e421a92bed60fb92d6582.r2.dev/persona.iso.iso";
+
+let started = false;
 let runtimeReady = false;
 let runtimeFailed = false;
 const trackedAudioContexts = [];
