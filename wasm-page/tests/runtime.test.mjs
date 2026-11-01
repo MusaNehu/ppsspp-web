@@ -510,7 +510,7 @@ test('Persona shortcut starts the download and emulator in the same click before
     ensurePersonaGameStored: () => { events.push('download'); return pending; },
     start: () => events.push('start'),
     updateIdleOverlay() {}, setStatus() {}, log() {}, showToast() {},
-    fileLabel: null, started: false,
+    fileLabel: null, started: false, window: { crossOriginIsolated: true },
   }, 'var selectedGame = { name: "other.iso" }; var selectedStoredGame = null; var personaDownloadPromise = null;');
   ctx.launchPersonaGame();
   assert.deepEqual(events, ['download', 'start']);
@@ -542,4 +542,22 @@ test('Persona storage reuses an existing non-empty OPFS ISO without downloading 
   });
   await ctx.ensurePersonaGameStored();
   assert.equal(fetched, false);
+});
+
+
+test('Persona shortcut performs the normal isolation reload before starting a download', () => {
+  let downloaded = false;
+  const events = [];
+  const ctx = load(['launchPersonaGame'], {
+    PERSONA_GAME_NAME: 'persona.iso.iso', SharedArrayBuffer: undefined,
+    window: { crossOriginIsolated: false },
+    ensurePersonaGameStored: () => { downloaded = true; return Promise.resolve(); },
+    start: () => events.push('start-for-isolation-reload'),
+    updateIdleOverlay() {}, setStatus() {}, log() {}, showToast() {},
+    fileLabel: null, started: false,
+  }, 'var selectedGame = null; var selectedStoredGame = null; var personaDownloadPromise = null;');
+  ctx.launchPersonaGame();
+  assert.deepEqual(events, ['start-for-isolation-reload']);
+  assert.equal(downloaded, false);
+  assert.equal(ctx.selectedStoredGame, null);
 });

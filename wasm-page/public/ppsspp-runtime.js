@@ -4774,6 +4774,13 @@ function installTouchMouseShim() {
 function launchPersonaGame() {
   if (started) return;
 
+  // Match the regular Start button: the isolation reload must happen before
+  // beginning a large download, otherwise navigation could interrupt it.
+  if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
+    start();
+    return;
+  }
+
   selectedGame = null;
   selectedStoredGame = PERSONA_GAME_NAME;
   if (fileLabel) {
