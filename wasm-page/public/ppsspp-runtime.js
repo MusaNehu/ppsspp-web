@@ -4380,6 +4380,10 @@ async function preloadGame(FS) {
       return fastPath;
     }
   } else if (selectedStoredGame) {
+    if (selectedStoredGame === PERSONA_GAME_NAME && personaDownloadPromise) {
+      await personaDownloadPromise;
+    }
+
     const storedFile = await opfsGetGameFile(selectedStoredGame);
     const fastPath = mountGameFileFast(FS, storedFile, safe, "OPFS");
     if (fastPath) return fastPath;
