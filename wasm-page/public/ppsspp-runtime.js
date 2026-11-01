@@ -4770,6 +4770,31 @@ function installTouchMouseShim() {
   log('Touch-to-mouse shim installed before SDL touch handlers.', 'info');
 }
 
+/* Launch the bundled Persona shortcut through the same OPFS + preload path as Library games. */
+function launchPersonaGame() {
+  if (started) return;
+
+  selectedGame = null;
+  selectedStoredGame = PERSONA_GAME_NAME;
+  if (fileLabel) {
+    fileLabel.title = PERSONA_GAME_NAME;
+    const textNode = fileLabel.firstChild;
+    if (textNode && textNode.nodeType === 3) textNode.textContent = "\\uD83D\\uDCC2 " + PERSONA_GAME_NAME + " ";
+  }
+  updateIdleOverlay();
+  setStatus("Preparing Persona for launch...", "run");
+
+  // Start the download and emulator in the same user gesture. preloadGame()
+  // awaits this promise before mounting the ISO, preserving browser audio unlock.
+  personaDownloadPromise = ensurePersonaGameStored();
+  personaDownloadPromise.catch(error => {
+    log("Persona launch preparation failed: " + (error?.message || error), "err");
+    setStatus("Persona download failed: " + (error?.message || error), "err");
+    showToast("Could not download Persona: " + (error?.message || error), 6000);
+  });
+  start();
+}
+
 /* ── Event wiring ───────────────────────────────────────────────── */
 on(fileInput, "change", () => {
   selectedGame = fileInput?.files?.[0] || null;
@@ -4787,6 +4812,8 @@ on(startBtn, "click", () => {
   start();
 });
 on(idleStartBtn, "click", start);
+on("personaBtn", "click", launchPersonaGame);
+on("idlePersonaBtn", "click", launchPersonaGame);
 
 on("refreshLibraryBtn", "click", refreshLibrary);
 on("libraryGrid", "click", e => {

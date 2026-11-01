@@ -499,3 +499,47 @@ test('network status distinguishes a relay check from an active game and surface
   assert.equal(ctx.networkStatusView({ enabled: false }, null, { state: 'unverified' }).title, 'Multiplayer disabled');
   assert.equal(ctx.networkStatusView(cfg, { state: 'registered' }, {}, 200, false).title, 'You are offline');
 });
+
+
+test('Persona shortcut starts the download and emulator in the same click before awaiting the download', () => {
+  const events = [];
+  let finishDownload;
+  const pending = new Promise(resolve => { finishDownload = resolve; });
+  const ctx = load(['launchPersonaGame'], {
+    PERSONA_GAME_NAME: 'persona.iso.iso',
+    ensurePersonaGameStored: () => { events.push('download'); return pending; },
+    start: () => events.push('start'),
+    updateIdleOverlay() {}, setStatus() {}, log() {}, showToast() {},
+    fileLabel: null, started: false,
+  }, 'var selectedGame = { name: "other.iso" }; var selectedStoredGame = null; var personaDownloadPromise = null;');
+  ctx.launchPersonaGame();
+  assert.deepEqual(events, ['download', 'start']);
+  assert.equal(ctx.selectedGame, null);
+  assert.equal(ctx.selectedStoredGame, 'persona.iso.iso');
+  finishDownload();
+});
+
+test('Persona launch waits for the OPFS download before mounting the stored ISO', async () => {
+  const events = [];
+  const ctx = load(['preloadGame'], {
+    PERSONA_GAME_NAME: 'persona.iso.iso', VIRTUAL_GAME_DIR: '/games',
+    setStatus() {}, showLoading() {}, formatBytes: String, log() {},
+    mountGameFileFast: (FS, file, safe, source) => { events.push('mount:' + source); return '/games/' + safe; },
+    opfsGetGameFile: async name => { events.push('read:' + name); return new Blob(['iso']); },
+  }, 'var selectedGame = null; var selectedStoredGame = "persona.iso.iso"; var personaDownloadPromise = Promise.resolve().then(() => events.push("download-ready"));');
+  const path = await ctx.preloadGame({ mkdirTree: () => events.push('mkdir') });
+  assert.equal(path, '/games/persona.iso.iso');
+  assert.deepEqual(events, ['mkdir', 'download-ready', 'read:persona.iso.iso', 'mount:OPFS']);
+});
+
+test('Persona storage reuses an existing non-empty OPFS ISO without downloading it again', async () => {
+  let fetched = false;
+  const ctx = load(['ensurePersonaGameStored'], {
+    PERSONA_GAME_NAME: 'persona.iso.iso', PERSONA_R2_GAME_URL: 'https://example.test/persona.iso.iso',
+    opfsGetGameFile: async () => new Blob(['cached-iso']),
+    fetch: async () => { fetched = true; throw new Error('should use OPFS cache'); },
+    log() {}, setStatus() {}, showLoading() {}, refreshLibrary() {},
+  });
+  await ctx.ensurePersonaGameStored();
+  assert.equal(fetched, false);
+});
