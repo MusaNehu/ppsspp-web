@@ -296,6 +296,8 @@ body.emulator-started #idleOverlay { opacity: 0; visibility: hidden; pointer-eve
 .idle-subtitle { color: #a4a7ae; font-size: 14px; line-height: 1.8; max-width: 350px; margin-top: 24px; }
 .idle-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; align-items: center; }
 .idle-actions button, .idle-actions label.btn { height: 44px; padding: 0 18px; font-size: 13px; border-radius: 5px; }
+.persona-btn { border-color: rgba(118,188,236,.42); color: #c7e5ff; }
+.persona-btn:hover { border-color: rgba(118,188,236,.78); background: rgba(78,145,204,.14); color: #fff; }
 .idle-repo-link { flex-basis: 100%; display: inline-flex; gap: 7px; align-items: center; margin-top: 10px; color: #9b9fa8; font-size: 12px; text-decoration: none; }
 .idle-repo-link:hover { color: var(--text); }
 .idle-formats { margin-top: 28px; color: #a4a7ae; font-size: 10px; letter-spacing: .06em; line-height: 1.8; }
