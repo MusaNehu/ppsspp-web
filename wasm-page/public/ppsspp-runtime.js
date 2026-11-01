@@ -4779,7 +4779,7 @@ function launchPersonaGame() {
   if (fileLabel) {
     fileLabel.title = PERSONA_GAME_NAME;
     const textNode = fileLabel.firstChild;
-    if (textNode && textNode.nodeType === 3) textNode.textContent = "\\uD83D\\uDCC2 " + PERSONA_GAME_NAME + " ";
+    if (textNode && textNode.nodeType === 3) textNode.textContent = "📂 " + PERSONA_GAME_NAME + " ";
   }
   updateIdleOverlay();
   setStatus("Preparing Persona for launch...", "run");
