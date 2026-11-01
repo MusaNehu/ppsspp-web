@@ -4364,6 +4364,35 @@ function persistSelectedGameInBackground(file) {
   })().catch(e => log("Could not persist fast-mounted game in OPFS: " + e.message, "warn"));
 }
 
+async function ensurePersonaGameStored() {
+  try {
+    const existing = await opfsGetGameFile(PERSONA_GAME_NAME);
+
+    if (existing && existing.size > 0) {
+      log("Persona ISO already exists in browser storage.", "ok");
+      return;
+    }
+  } catch (_) {
+    // Persona is not stored yet.
+  }
+
+  setStatus("Downloading Persona ISO...", "run");
+  showLoading("Downloading Persona ISO...");
+
+  const response = await fetch(PERSONA_R2_GAME_URL, {
+    mode: "cors",
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("Persona download failed: HTTP " + response.status);
+  }
+
+  const stored = await storeGameResponse(PERSONA_GAME_NAME, response);
+
+  log("Persona ISO downloaded and saved: " + formatBytes(stored.size), "ok");
+  await refreshLibrary();
+}
 async function preloadGame(FS) {
   if (!selectedGame && !selectedStoredGame) return null;
   FS.mkdirTree(VIRTUAL_GAME_DIR);
