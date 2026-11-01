@@ -506,7 +506,7 @@ test('Persona shortcut starts the download and emulator in the same click before
   let finishDownload;
   const pending = new Promise(resolve => { finishDownload = resolve; });
   const ctx = load(['launchPersonaGame'], {
-    PERSONA_GAME_NAME: 'persona.iso.iso',
+    PERSONA_GAME_NAME: 'persona.iso.iso', SharedArrayBuffer, window: { crossOriginIsolated: true },
     ensurePersonaGameStored: () => { events.push('download'); return pending; },
     start: () => events.push('start'),
     updateIdleOverlay() {}, setStatus() {}, log() {}, showToast() {},
